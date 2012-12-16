@@ -1,0 +1,22 @@
+import org.gradle.plugins.javascript.coffeescript.CoffeeScriptCompile
+
+apply plugin: 'coffeescript-base'
+
+repositories {
+    mavenCentral()
+    mavenRepo name: "Gradle", url: "http://repo.gradle.org/gradle/repo"
+}
+
+task compileCoffeeScript(type: CoffeeScriptCompile) {
+    source fileTree('src/coffee')
+    destinationDir file('src/js')
+}
+
+task buildZip(type: Zip, dependsOn: 'compileCoffeeScript') {
+    from ('manifest.json')
+    from ('src') {
+        exclude 'coffee'
+    }
+
+    into('/')
+}
