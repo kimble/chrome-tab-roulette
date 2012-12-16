@@ -26,5 +26,14 @@
         "tabs",
         "storage",
         "<all_urls>"
+    ],
+
+    "content_scripts" : [
+        {
+            "matches": [ "<all_urls>" ],
+            "css": [ "src/css/content-script.css" ],
+            "js": [ "src/jslib/jquery-1.8.3.js", "src/js/content-script.js" ]
+        }
     ]
+
 }
