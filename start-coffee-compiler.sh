@@ -1,1 +1,1 @@
-coffee --compile --output src/js --watch src/coffee.coffee
+coffee --compile --output src/js --watch src/coffee/*coffee

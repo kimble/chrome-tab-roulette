@@ -12,6 +12,7 @@ chrome.browserAction.onClicked.addListener (tab) =>
 disable = =>
     active = false
     chrome.browserAction.setBadgeText { text: "" }
+    chrome.browserAction.setIcon { path: "src/images/icon_19x19_grey.png" }
 
     withCurrentWindow (window) ->
         withAllTabsInWindow window.id, (tabs) ->
@@ -21,6 +22,8 @@ disable = =>
 activate = =>
     active = true
     chrome.browserAction.setBadgeText { text: "Active" }
+    chrome.browserAction.setIcon { path: "src/images/icon_19x19.png" }
+
 
     withCurrentWindow (window) ->
         withAllTabsInWindow window.id, (tabs) ->
