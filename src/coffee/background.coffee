@@ -32,7 +32,8 @@ activate = =>
 
     withCurrentWindow (window) ->
         withFirstTab window.id, (firstTab) ->
-            transitionTo firstTab
+            transitionTo firstTab, ->
+
 
 
 withFirstTab = (windowId, callback) ->
@@ -46,29 +47,27 @@ withSettingsFor = (tab, callback) ->
     settings.load callback
 
 
-transitionTo = (tab) ->
+transitionTo = (tab, callback) ->
     if active
         withSettingsFor tab, (tabSettings) ->
             secondsOnPage = tabSettings.seconds
 
             selectTab tab, ->
                 chrome.tabs.sendMessage tab.id, { event: 'tab.focus.gained' }
-
+                callback(tab)
 
                 withNextTab tab, (next) ->
-                    withSettingsFor next, (nextSettings) ->
-                        if nextSettings.reload
-                            chrome.tabs.reload next.id
+                    timeoutCallback = ->
+                        transitionTo next, ->
+                            if tabSettings.reload
+                                chrome.tabs.reload tab.id
 
-                        timeoutCallback = ->
-                            transitionTo next
+                    beforeTimeoutCallback = ->
+                        chrome.tabs.sendMessage tab.id, { event: 'tab.focusloss.imminent' }
 
-                        beforeTimeoutCallback = ->
-                            chrome.tabs.sendMessage tab.id, { event: 'tab.focusloss.imminent' }
-
-                        chrome.tabs.sendMessage next.id, { event: 'tab.focus.scheduled' }
-                        setTimeout timeoutCallback, secondsOnPage * 1000
-                        setTimeout beforeTimeoutCallback, (secondsOnPage-1) * 1000
+                    chrome.tabs.sendMessage next.id, { event: 'tab.focus.scheduled' }
+                    setTimeout timeoutCallback, secondsOnPage * 1000
+                    setTimeout beforeTimeoutCallback, (secondsOnPage-1) * 1000
 
 
 withNextTab = (current, callback) ->
