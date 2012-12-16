@@ -9,16 +9,27 @@ repositories {
 
 task compileCoffeeScript(type: CoffeeScriptCompile) {
     source fileTree('src/coffee')
-    destinationDir file('src/js')
+    destinationDir file('build/target/src/js')
 }
 
-task buildZip(type: Zip, dependsOn: 'compileCoffeeScript') {
-    from ('manifest.json')
-    from ('src') {
-        exclude 'coffee'
-    }
+
+task buildZip(type: Zip, dependsOn: ['compileCoffeeScript', 'copySourceFiles', 'copyManifest']) {
+    from ('build/target')
 
     into('/')
+}
+
+task copySourceFiles(type: Copy) {
+    from('src') {
+        exclude "coffee"
+    }
+
+    into 'build/target/src'
+}
+
+task copyManifest(type: Copy) {
+    from 'manifest.json'
+    into 'build/target'
 }
 
 task wrapper(type: Wrapper) {
