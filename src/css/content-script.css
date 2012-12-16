@@ -1,0 +1,22 @@
+.chrome-tab-blinder {
+    z-index: 999999;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background-color: white;
+    opacity: 1;
+}
+
+.chrome-tab-blinder.roulette-fade-content-out {
+    opacity: 1;
+    -webkit-transition: opacity 800ms linear;
+}
+
+.chrome-tab-blinder.roulette-fade-content-in {
+    opacity: 0;
+    -webkit-transition: opacity 900ms linear;
+}

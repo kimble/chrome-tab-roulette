@@ -1,5 +1,7 @@
 active = false
 
+
+
 chrome.browserAction.onClicked.addListener (tab) =>
     if active
         disable()
@@ -11,9 +13,19 @@ disable = =>
     active = false
     chrome.browserAction.setBadgeText { text: "" }
 
+    withCurrentWindow (window) ->
+        withAllTabsInWindow window.id, (tabs) ->
+            sendCloseMessage = (tab) -> chrome.tabs.sendMessage tab.id, { event: 'slideshow.ended' }
+            sendCloseMessage(tab) for tab in tabs
+
 activate = =>
     active = true
     chrome.browserAction.setBadgeText { text: "Active" }
+
+    withCurrentWindow (window) ->
+        withAllTabsInWindow window.id, (tabs) ->
+            sendCloseMessage = (tab) -> chrome.tabs.sendMessage tab.id, { event: 'slideshow.started' }
+            sendCloseMessage(tab) for tab in tabs
 
     withCurrentWindow (window) ->
         withFirstTab window.id, (firstTab) ->
@@ -37,13 +49,23 @@ transitionTo = (tab) ->
             secondsOnPage = tabSettings.seconds
 
             selectTab tab, ->
+                chrome.tabs.sendMessage tab.id, { event: 'tab.focus.gained' }
+
+
                 withNextTab tab, (next) ->
                     withSettingsFor next, (nextSettings) ->
                         if nextSettings.reload
                             chrome.tabs.reload next.id
 
-                        timeoutCallback = -> transitionTo next
+                        timeoutCallback = ->
+                            transitionTo next
+
+                        beforeTimeoutCallback = ->
+                            chrome.tabs.sendMessage tab.id, { event: 'tab.focusloss.imminent' }
+
+                        chrome.tabs.sendMessage next.id, { event: 'tab.focus.scheduled' }
                         setTimeout timeoutCallback, secondsOnPage * 1000
+                        setTimeout beforeTimeoutCallback, (secondsOnPage-1) * 1000
 
 
 withNextTab = (current, callback) ->
