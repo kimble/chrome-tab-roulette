@@ -33,7 +33,6 @@ class TabSettings
         update[@key] = JSON.stringify @state
 
         storage.set update, =>
-            console.log "Updated settings for " + @key
             console.dir update
 
 
