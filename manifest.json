@@ -1,7 +1,7 @@
 {
     "manifest_version"  : 2,
     "name"              : "Tab Roulette",
-    "version"           : "0.4",
+    "version"           : "0.5",
     "description"       : "Tab slideshow plugin - Awesome for in-office dashboards!",
 
     "options_page"      : "src/view/mission-control.html",
@@ -18,13 +18,13 @@
             "src/jslib/underscore-1.4.3.js",
             "src/js/lib.js",
             "src/js/background.js"
-        ],
-        "persistent": false
+        ]
     },
 
     "permissions" : [
         "tabs",
         "storage",
+        "background",
         "<all_urls>"
     ],
 
