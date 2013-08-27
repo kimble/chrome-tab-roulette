@@ -47,7 +47,8 @@ module.exports = function (grunt) {
         karma: {
             unit: {
                 configFile: 'config/karma.conf.js',
-                browsers: ['PhantomJS']
+                browsers: ['PhantomJS'],
+                background: true
             }
         },
         coffee: {
@@ -64,6 +65,10 @@ module.exports = function (grunt) {
             coffee: {
                 files: ['src/main/coffee/*.coffee'],
                 tasks: 'build'
+            },
+            karma: {
+                files: ['dist/javascript/compiled/**/*.js', 'src/test/javascript/**/*.js'],
+                tasks: ['karma:unit:run']
             }
         }
     });
@@ -78,6 +83,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-karma');
 
 
+    grunt.registerTask('tdd', [ 'karma:unit', 'watch' ]);
     grunt.registerTask('build', [ 'clean:dist', 'coffee', 'copy' ]);
 
     // Default task.
