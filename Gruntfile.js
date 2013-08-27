@@ -46,10 +46,8 @@ module.exports = function (grunt) {
         },
         karma: {
             unit: {
-                //configFile: 'karma.conf.js',
-                runnerPort: 9999,
-                browsers: ['PhantomJS'],
-                background: true
+                configFile: 'config/karma.conf.js',
+                browsers: ['PhantomJS']
             }
         },
         coffee: {
@@ -75,6 +73,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-notify');
+
     grunt.loadNpmTasks('grunt-karma');
 
 

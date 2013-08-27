@@ -8,7 +8,7 @@ chrome.browserAction.onClicked.addListener (tab) =>
     else
         activate()
 
- 
+
 
 disable = =>
     active = false
