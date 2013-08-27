@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html ng-app="" ng-csp="" lang="en">
+<head>
+    <meta charset="utf-8">
+    <script src="../../dependencies/javascript/angular.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../dependencies/javascript/underscore-1.4.3.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../dependencies/javascript/jquery-1.8.3.js" type="text/javascript" charset="utf-8"></script>
+
+    <script src="../js/lib.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/mission-control.js" type="text/javascript" charset="utf-8"></script>
+
+    <title>Tab Roulette - Options</title>
+    <link rel="icon" href="../images/icon_16x16.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+            /* Custom container */
+        .container-narrow {
+            margin: 0 auto;
+            max-width: 700px;
+        }
+        .container-narrow > hr {
+            margin: 30px 0;
+        }
+
+            /* Main marketing message and sign up button */
+
+        .jumbotron h1 {
+            font-size: 72px;
+            line-height: 1;
+        }
+
+            /* Supporting marketing content */
+        .marketing {
+            margin: 60px 0;
+        }
+        .marketing p + h4 {
+            margin-top: 28px;
+        }
+
+
+        #tabs .seconds {
+            width: 50px;
+        }
+
+        .favicon {
+            max-width: 16px;
+            max-height: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-narrow">
+
+    <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+            <li><a href="http://github.com/kimble">About</a></li>
+        </ul>
+        <h3 class="muted">Tab Roulette for Chrome : Options</h3>
+    </div>
+
+    <hr>
+
+    <div id="tabs" ng-controller="TabController">
+        <div class="row-fluid marketing" ng-repeat="tab in tabs">
+            <div class="span5 thumbnails">
+                <a class="thumbnail">
+                    <img ng-src="{{tab.imageUrl}}" ng-click="gotoTab(tab)">
+                </a>
+            </div>
+            <div class="span7">
+                <h4><img class="favicon" src="{{tab.favIconUrl}}"> {{tab.title}}</h4>
+                <p><small><b>Settings key: </b> {{tab.settings.key}}</small></p>
+
+                <form class="form" style="margin-top: 2em" class="pull-right">
+                    <div class="input-append">
+                        <input type="text" placeholder="Seconds of fame" class="seconds" ng-model="tab.settings.state.seconds" ng-change="updateSettings(tab)">
+                        <span class="add-on">sek</span>
+                    </div>
+
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="tab.settings.state.reload" ng-change="updateSettings(tab)" id="reload-{{tab.id}}"> Reload page
+                    </label>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="footer">
+        <p>&copy; Developer-B 2012</p>
+    </div>
+</div>
+
+</body>
+</html>
