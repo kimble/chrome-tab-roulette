@@ -1,30 +1,51 @@
-active = false
+
+
+iconBus = new Bacon.Bus
+
+console = chrome.extension.getBackgroundPage().console
+
+
+chrome.browserAction.onClicked.addListener (activeTab) ->
+    iconBus.push {
+            tabId: activeTab.id
+            windowId: activeTab.windowId
+    }
 
 
 
-chrome.browserAction.onClicked.addListener (tab) =>
-    if active
-        disable()
-    else
-        activate()
+
+isActive = iconBus.scan(false, (previous) -> !previous)
+activate = isActive.filter((a) -> a)
+deactivate = isActive.filter((a) -> !a)
 
 
-disable = =>
-    active = false
+
+
+activateBadge = ->
+    chrome.browserAction.setBadgeText { text: "ON!" }
+    chrome.browserAction.setIcon { path: "src/images/icon_19x19.png" }
+
+deactivateBadge = ->
     chrome.browserAction.setBadgeText { text: "" }
     chrome.browserAction.setIcon { path: "src/images/icon_19x19_grey.png" }
 
+
+activate.onValue(activateBadge)
+
+deactivate.onValue(deactivateBadge)
+
+
+
+###
+
+
+disable = =>
     withCurrentWindow (window) ->
         withAllTabsInWindow window.id, (tabs) ->
             sendCloseMessage = (tab) -> chrome.tabs.sendMessage tab.id, { event: 'slideshow.ended' }
             sendCloseMessage(tab) for tab in tabs
 
 activate = =>
-    active = true
-    chrome.browserAction.setBadgeText { text: "Active" }
-    chrome.browserAction.setIcon { path: "src/images/icon_19x19.png" }
-
-
     withCurrentWindow (window) ->
         withAllTabsInWindow window.id, (tabs) ->
             sendCloseMessage = (tab) -> chrome.tabs.sendMessage tab.id, { event: 'slideshow.started' }
@@ -90,3 +111,4 @@ withNextTab = (current, callback) ->
         else
             alert "No tabs!?"
             disable()
+###
