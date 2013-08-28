@@ -13,7 +13,7 @@ browser_action:
 
 background:
   scripts:
-    - javascript/dependencies/underscore-1.4.3.js
+    - javascript/lib/underscore.js
     - javascript/compiled/lib.js'
     - javascript/compiled/background.js
 
@@ -34,5 +34,5 @@ content_scripts:
   css:
     - assets/css/content-script.css
   js:
-    - javascript/dependencies/jquery-1.8.3.js
+    - javascript/lib/jquery.js
     - javascript/dependencies/content-script.js

@@ -11,6 +11,14 @@ module.exports = (grunt) ->
             ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n'
 
         # Task configuration.
+
+        bower:
+          install:
+            options:
+              layout: 'byComponent'
+              targetDir: 'dependencies/bower'
+              cleanTargetDir: true
+
         clean:
             dist: [ 'dist/' ]
 
@@ -18,6 +26,7 @@ module.exports = (grunt) ->
             release:
                 options:
                     archive: 'builds/chrome-tab-roulette-v<%= pkg.version %>.zip'
+
                 files: [
                     {
                         src: [ 'dist/**' ],
@@ -44,11 +53,12 @@ module.exports = (grunt) ->
                 src: ['*.html'],
                 dest: 'dist/assets/html'
 
-            dependencies:
+            bowerDependencies:
                 expand: true,
-                cwd: 'dependencies/javascript',
-                src: ['*.js'],
-                dest: 'dist/javascript/dependencies/'
+                flatten: true
+                cwd: 'dependencies/bower',
+                src: ['**/*.js'],
+                dest: 'dist/javascript/lib/'
 
 
         karma:
@@ -98,6 +108,7 @@ module.exports = (grunt) ->
     grunt.loadNpmTasks 'grunt-contrib-copy'
     grunt.loadNpmTasks 'grunt-contrib-coffee'
     grunt.loadNpmTasks 'grunt-contrib-watch'
+    grunt.loadNpmTasks 'grunt-bower-task'
     grunt.loadNpmTasks 'grunt-notify'
     grunt.loadNpmTasks 'grunt-yaml'
     grunt.loadNpmTasks 'grunt-karma'
