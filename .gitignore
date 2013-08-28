@@ -1,5 +1,6 @@
 builds
 bower_components
+dist
 src/js
 .idea
 .gradle
