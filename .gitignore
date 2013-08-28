@@ -1,4 +1,5 @@
-build
+builds
+bower_components
 src/js
 .idea
 .gradle
