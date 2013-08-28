@@ -16,6 +16,19 @@ module.exports = function (grunt) {
         clean: {
             dist: ['dist/']
         },
+        compress: {
+            release: {
+                options: {
+                    archive: 'builds/chrome-tab-roulette-v<%= pkg.version %>.zip'
+                },
+                files: [
+                    {
+                        src: [ 'dist/**' ],
+                        dest: '/'
+                    }
+                ]
+            }
+        },
         copy: {
             images: {
                 expand: true,
@@ -36,7 +49,9 @@ module.exports = function (grunt) {
                 dest: 'dist/assets/html'
             },
             dependencies: {
-                src: 'dependencies/**/*.js',
+                expand: true,
+                cwd: 'dependencies/javascript',
+                src: ['*.js'],
                 dest: 'dist/javascript/dependencies/'
             }
         },
@@ -45,6 +60,11 @@ module.exports = function (grunt) {
                 configFile: 'config/karma.conf.js',
                 browsers: ['PhantomJS'],
                 background: true
+            },
+            single: {
+                configFile: 'config/karma.conf.js',
+                browsers: ['PhantomJS'],
+                singleRun: true
             }
         },
         coffee: {
@@ -78,6 +98,7 @@ module.exports = function (grunt) {
 
     // These plugins provide necessary tasks.
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
@@ -87,7 +108,8 @@ module.exports = function (grunt) {
 
 
     grunt.registerTask('tdd', [ 'karma:unit', 'watch' ]);
-    grunt.registerTask('build', [ 'clean:dist', 'yaml', 'coffee', 'copy' ]);
+    grunt.registerTask('build', [ 'clean:dist', 'yaml', 'coffee', 'copy', 'karma:single' ]);
+    grunt.registerTask('build-release', [ 'build', 'compress:release' ]);
 
     // Default task.
     grunt.registerTask('default', [ 'build' ]);
