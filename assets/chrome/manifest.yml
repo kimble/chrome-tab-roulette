@@ -24,7 +24,8 @@ icons:
 background:
   scripts:
     - javascript/lib/underscore.js
-    - javascript/lib.js
+    - javascript/settings.js
+    - javascript/common.js
     - javascript/background.js
 
 content_scripts:

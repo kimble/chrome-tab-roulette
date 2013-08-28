@@ -1,34 +1,15 @@
 disableFunction = null
 
 
-
 ###
     Tabs
     ----
     http://developer.chrome.com/extensions/tabs.html
 ###
 
-urlMatching = (regex) ->
-    (tab) ->
-        regex.test(tab.url)
-
-inWindow = (windowId) ->
-    (tab) ->
-        tab.windowId == windowId
-
-matchAll = -> true
-
-both = (predicateA, predicateB) ->
-    (input) ->
-        predicateA(input) and predicateB(input)
-
-
 matchingTabsInWindow = (windowId, predicate, callback) -> chrome.tabs.query { windowId: windowId }, (tabs) ->
     matchedTabs = tabs.filter (tab) -> predicate(tab)
     callback(matchedTabs)
-
-
-httpOrFileTabPredicate = urlMatching(/^(http|file)/)
 
 
 nextTab = (currentTab, tabSelector, callback) ->
@@ -44,10 +25,6 @@ nextTab = (currentTab, tabSelector, callback) ->
         callback(selectedTab)
 
 
-cycleToTab = (targetTab, callback) ->
-    chrome.tabs.update targetTab.id, { active: true }, callback
-
-
 
 ###
     Content Script - Messages
@@ -55,25 +32,11 @@ cycleToTab = (targetTab, callback) ->
 ###
 
 sendMessageToTab = (recipientTab, payload) ->
-    console.log ("Sending message to " + recipientTab.title)
-    console.log (payload)
     chrome.tabs.sendMessage recipientTab.id, payload
 
 sendDelayedMessageToTab = (recipentTab, delayInMillis, payload) ->
     delayedFunc = -> sendMessageToTab recipentTab, payload
     setTimeout delayedFunc, delayInMillis
-
-
-
-###
-    Settings
-###
-
-withSettingsFor = (tab, callback) ->
-    settings = new TabSettings tab.url
-    settings.load callback
-
-
 
 
 ###
@@ -101,14 +64,13 @@ chrome.browserAction.onClicked.addListener (startingTab) =>
             disableFunction = null
             deactivateBadge()
 
-            withCurrentWindow (window) ->
-                withAllTabsInWindow window.id, (tabs) ->
-                    sendCloseMessage = (tab) -> sendMessageToTab tab, { event: 'slideshow.ended' }
-                    sendCloseMessage(tab) for tab in tabs
+            fileAndHttpTabsInWindow (tabs) ->
+                sendCloseMessage = (tab) -> sendMessageToTab tab, { event: 'slideshow.ended' }
+                sendCloseMessage(tab) for tab in tabs
 
 
         fileAndHttpTabsInWindow = (callback) ->
-            matchingTabsInWindow startingTab.windowId, httpOrFileTabPredicate, callback
+            matchingTabsInWindow startingTab.windowId, cycleableTabPredicate, callback
 
         cancelRouletteOnEmpty = (tabSelector) ->
             (callback) ->
@@ -126,25 +88,25 @@ chrome.browserAction.onClicked.addListener (startingTab) =>
         considerReloading = (tab) ->
             withSettingsFor tab, (tabSettings) ->
                 if tabSettings.reload
-                    func = chrome.tabs.reload tab.id
+                    func = -> chrome.tabs.reload tab.id
                     setTimeout func, 1000
 
-        scheduleTabSwap = (targetTab, delayInSeconds) ->
-            func = -> nextTabSelector targetTab, cycle
-            delay = delayInSeconds * 1000
-            setTimeout func, delay
+
 
 
         cycle = (previousTab, targetTab) ->
-            sendMessageToTab targetTab, { event: 'tab.focus.scheduled' }
+            if disableFunction != null
+                sendMessageToTab targetTab, { event: 'tab.focus.scheduled' }
 
-            cycleToTab targetTab, (activeTab) -> # Todo: Check that activeTab exists
-                sendMessageToTab activeTab, { event: 'tab.focus.gained' }
-                considerReloading previousTab
+                selectTab targetTab, (activeTab) -> # Todo: Check that activeTab exists
+                    sendMessageToTab activeTab, { event: 'tab.focus.gained' }
+                    considerReloading previousTab
 
-                withSettingsFor activeTab, (settings) ->
-                    scheduleTabSwap targetTab, settings.seconds
-                    sendDelayedMessageToTab activeTab, (settings.seconds - 1) * 1000, { event: 'tab.focusloss.imminent' }
+                    withSettingsFor activeTab, (settings) ->
+                        func = -> nextTabSelector targetTab, cycle
+                        setTimeout func, settings.seconds * 1000
+
+                        sendDelayedMessageToTab activeTab, (settings.seconds - 1) * 1000, { event: 'tab.focusloss.imminent' }
 
 
 

@@ -39,17 +39,6 @@ class TabSettings
 window.TabSettings = TabSettings
 
 
-###
-    Chrome helper functions
-###
-
-window.selectTab = (tab, callback) -> chrome.tabs.update tab.id, { active: true }, callback
-window.withCurrentTab = (callback) -> chrome.tabs.getCurrent (current) => callback current
-window.withAllTabsInWindow = (windowId, callback) -> chrome.tabs.query { windowId: windowId }, callback
-window.withCurrentWindow = (callback) -> chrome.windows.getCurrent { populate: false }, callback
-
-window.anyTabsInWindowMatching = (windowId, predicate, callback) ->
-    withAllTabsInWindow windowId, (tabs) ->
-        callback _.filter tabs, predicate
-
-window.httpTabPredicate = (tab) -> /^(http|file)/.test(tab.url)
+window.withSettingsFor = (tab, callback) ->
+    settings = new TabSettings tab.url
+    settings.load callback

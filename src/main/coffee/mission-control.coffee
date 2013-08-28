@@ -12,8 +12,8 @@ window.TabController = ($scope) ->
 
     # Kick everything of
     withCurrentTab (currentTab) ->
-        anyTabsInWindowMatching currentTab.windowId, httpTabPredicate, (allTabs) -> # Todo: Have a look at the predicate..
-            iterate allTabs, (tab, next) ->
+        anyTabsInWindowMatching currentTab.windowId, cycleableTabPredicate, (matchedTabs) ->
+            iterate matchedTabs, (tab, next) ->
                 withScreenshotOf tab, (imageUrl) ->
                     withSettings tab, (settings) ->
                         $scope.$apply ->
@@ -34,10 +34,20 @@ window.TabController = ($scope) ->
     Chrome helper functions
 ###
 
+withCurrentTab = (callback) ->
+    chrome.tabs.getCurrent (current) => callback current
+
 forNewTabsInWindow = (windowId, callback) ->
     chrome.tabs.onCreated.addListener (newTab) =>
         if windowId == newTab.windowId
             callback newTab
+
+anyTabsInWindowMatching = (windowId, predicate, callback) ->
+    withAllTabsInWindow windowId, (tabs) ->
+        callback _.filter tabs, predicate
+
+withAllTabsInWindow = (windowId, callback) ->
+    chrome.tabs.query { windowId: windowId }, callback
 
 withSettings = (tab, callback) ->
     settings = new TabSettings tab.url
