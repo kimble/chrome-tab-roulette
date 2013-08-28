@@ -35,10 +35,6 @@ module.exports = function (grunt) {
                 src: ['*.html'],
                 dest: 'dist/assets/html'
             },
-            chrome: {
-                src: 'assets/chrome/manifest.json',
-                dest: 'dist/manifest.json'
-            },
             dependencies: {
                 src: 'dependencies/**/*.js',
                 dest: 'dist/javascript/dependencies/'
@@ -61,6 +57,13 @@ module.exports = function (grunt) {
                 ext: '.js'
             }
         },
+        yaml: {
+            chromeManifest: {
+                files: {
+                    'dist/manifest.json': 'assets/chrome/manifest.yml'
+                }
+            }
+        },
         watch: {
             coffee: {
                 files: ['src/main/coffee/*.coffee'],
@@ -79,12 +82,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-notify');
-
+    grunt.loadNpmTasks('grunt-yaml');
     grunt.loadNpmTasks('grunt-karma');
 
 
     grunt.registerTask('tdd', [ 'karma:unit', 'watch' ]);
-    grunt.registerTask('build', [ 'clean:dist', 'coffee', 'copy' ]);
+    grunt.registerTask('build', [ 'clean:dist', 'yaml', 'coffee', 'copy' ]);
 
     // Default task.
     grunt.registerTask('default', [ 'build' ]);
