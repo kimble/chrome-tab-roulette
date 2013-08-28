@@ -5,6 +5,7 @@
 chrome.extension.onMessage.addListener (request, sender, sendResponse) ->
     if request.event == 'tab.focus.scheduled'
         if $('#chrometabblinder').length == 0
+            console.log("Adding blinder...")
             blind = document.createElement 'div'
             blind.id = 'chrometabblinder'
             blind.className = 'chrome-tab-blinder'

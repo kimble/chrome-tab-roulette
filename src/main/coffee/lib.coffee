@@ -52,4 +52,4 @@ window.anyTabsInWindowMatching = (windowId, predicate, callback) ->
     withAllTabsInWindow windowId, (tabs) ->
         callback _.filter tabs, predicate
 
-window.httpTabPredicate = (tab) -> /^http/.test(tab.url)
+window.httpTabPredicate = (tab) -> /^(http|file)/.test(tab.url)

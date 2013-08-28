@@ -1,93 +1,158 @@
-active = false
+disableFunction = null
 
 
 
-chrome.browserAction.onClicked.addListener (tab) =>
-    if active
-        disable()
-    else
-        activate()
+###
+    Tabs
+    ----
+    http://developer.chrome.com/extensions/tabs.html
+###
+
+urlMatching = (regex) ->
+    (tab) ->
+        regex.test(tab.url)
+
+inWindow = (windowId) ->
+    (tab) ->
+        tab.windowId == windowId
+
+matchAll = -> true
+
+both = (predicateA, predicateB) ->
+    (input) ->
+        predicateA(input) and predicateB(input)
+
+
+matchingTabsInWindow = (windowId, predicate, callback) -> chrome.tabs.query { windowId: windowId }, (tabs) ->
+    matchedTabs = tabs.filter (tab) -> predicate(tab)
+    callback(matchedTabs)
+
+
+httpOrFileTabPredicate = urlMatching(/^(http|file)/)
+
+
+nextTab = (currentTab, tabSelector, callback) ->
+    tabSelector (matchedTabs) ->
+        lastTabIndex = matchedTabs.length - 1
+        selectedTab = matchedTabs[0]
+
+        for tab, i in matchedTabs
+            if tab.id == currentTab.id && i < lastTabIndex
+                selectedTab = matchedTabs[i+1]
+                break
+
+        callback(selectedTab)
+
+
+cycleToTab = (targetTab, callback) ->
+    chrome.tabs.update targetTab.id, { active: true }, callback
 
 
 
-disable = =>
-    active = false
-    chrome.browserAction.setBadgeText { text: "" }
-    chrome.browserAction.setIcon { path: "src/images/icon_19x19_grey.png" }
+###
+    Content Script - Messages
+    http://developer.chrome.com/extensions/messaging.html
+###
 
-    withCurrentWindow (window) ->
-        withAllTabsInWindow window.id, (tabs) ->
-            sendCloseMessage = (tab) -> chrome.tabs.sendMessage tab.id, { event: 'slideshow.ended' }
-            sendCloseMessage(tab) for tab in tabs
+sendMessageToTab = (recipientTab, payload) ->
+    console.log ("Sending message to " + recipientTab.title)
+    console.log (payload)
+    chrome.tabs.sendMessage recipientTab.id, payload
 
-activate = =>
-    active = true
-    chrome.browserAction.setBadgeText { text: "Active" }
-    chrome.browserAction.setIcon { path: "src/images/icon_19x19.png" }
-
-
-    withCurrentWindow (window) ->
-        withAllTabsInWindow window.id, (tabs) ->
-            sendCloseMessage = (tab) -> chrome.tabs.sendMessage tab.id, { event: 'slideshow.started' }
-            sendCloseMessage(tab) for tab in tabs
-
-    withCurrentWindow (window) ->
-        withFirstTab window.id, (firstTab) ->
-            transitionTo firstTab, ->
+sendDelayedMessageToTab = (recipentTab, delayInMillis, payload) ->
+    delayedFunc = -> sendMessageToTab recipentTab, payload
+    setTimeout delayedFunc, delayInMillis
 
 
 
-withFirstTab = (windowId, callback) ->
-    withAllTabsInWindow windowId, (tabs) ->
-        if tabs.length > 0
-            callback tabs[0]
-
+###
+    Settings
+###
 
 withSettingsFor = (tab, callback) ->
     settings = new TabSettings tab.url
     settings.load callback
 
 
-transitionTo = (tab, callback) ->
-    if active
-        withSettingsFor tab, (tabSettings) ->
-            secondsOnPage = tabSettings.seconds
-
-            selectTab tab, ->
-                chrome.tabs.sendMessage tab.id, { event: 'tab.focus.gained' }
-                callback(tab)
-
-                withNextTab tab, (next) ->
-                    timeoutCallback = ->
-                        transitionTo next, ->
-                            if tabSettings.reload
-                                chrome.tabs.reload tab.id
-
-                    beforeTimeoutCallback = ->
-                        chrome.tabs.sendMessage tab.id, { event: 'tab.focusloss.imminent' }
-
-                    chrome.tabs.sendMessage next.id, { event: 'tab.focus.scheduled' }
-                    setTimeout timeoutCallback, secondsOnPage * 1000
-                    setTimeout beforeTimeoutCallback, (secondsOnPage-1) * 1000
 
 
-withNextTab = (current, callback) ->
-    anyTabsInWindowMatching current.windowId, httpTabPredicate, (httpTabs) ->
-        if httpTabs.length > 0
-            chosenTab = httpTabs[0]
-            pickNext = false
+###
+    Badge
+    -----
+    http://developer.chrome.com/extensions/browserAction.html
+###
 
-            for tab in httpTabs
-                do (tab) ->
-                    if current.id == tab.id
-                        pickNext = true
+updateBadge = (text, iconPath) ->
+    chrome.browserAction.setBadgeText { text: text }
+    chrome.browserAction.setIcon { path: iconPath }
 
-                    else if pickNext
-                        chosenTab = tab
-                        pickNext = false
+deactivateBadge = -> updateBadge("", "assets/images/icon_19x19_grey.png")
+activateBadge = -> updateBadge("ON!", "assets/images/icon_19x19.png")
 
-            callback chosenTab
 
-        else
-            alert "No tabs!?"
-            disable()
+chrome.browserAction.onClicked.addListener (startingTab) =>
+    if disableFunction == null
+        activateBadge()
+
+        disableFunction = (reason) ->
+            if reason?.length
+                alert reason
+
+            disableFunction = null
+            deactivateBadge()
+
+            withCurrentWindow (window) ->
+                withAllTabsInWindow window.id, (tabs) ->
+                    sendCloseMessage = (tab) -> sendMessageToTab tab, { event: 'slideshow.ended' }
+                    sendCloseMessage(tab) for tab in tabs
+
+
+        fileAndHttpTabsInWindow = (callback) ->
+            matchingTabsInWindow startingTab.windowId, httpOrFileTabPredicate, callback
+
+        cancelRouletteOnEmpty = (tabSelector) ->
+            (callback) ->
+                tabSelector (matchedTabs) ->
+                    if matchedTabs.length > 0
+                        callback(matchedTabs)
+                    else
+                        disable("No tabs - Cancelling!")
+
+        nextTabSelector = (currentTab, callback) ->
+            nextTab currentTab, cancelRouletteOnEmpty(fileAndHttpTabsInWindow), (nextTab) ->
+                callback(currentTab, nextTab)
+
+
+        considerReloading = (tab) ->
+            withSettingsFor tab, (tabSettings) ->
+                if tabSettings.reload
+                    func = chrome.tabs.reload tab.id
+                    setTimeout func, 1000
+
+        scheduleTabSwap = (targetTab, delayInSeconds) ->
+            func = -> nextTabSelector targetTab, cycle
+            delay = delayInSeconds * 1000
+            setTimeout func, delay
+
+
+        cycle = (previousTab, targetTab) ->
+            sendMessageToTab targetTab, { event: 'tab.focus.scheduled' }
+
+            cycleToTab targetTab, (activeTab) -> # Todo: Check that activeTab exists
+                sendMessageToTab activeTab, { event: 'tab.focus.gained' }
+                considerReloading previousTab
+
+                withSettingsFor activeTab, (settings) ->
+                    scheduleTabSwap targetTab, settings.seconds
+                    sendDelayedMessageToTab activeTab, (settings.seconds - 1) * 1000, { event: 'tab.focusloss.imminent' }
+
+
+
+        # Kickoff from the tab that was active when the badge was clicked
+        nextTabSelector startingTab, cycle
+
+
+    else
+        if disableFunction != null
+            disableFunction()
+

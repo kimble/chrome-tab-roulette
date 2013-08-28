@@ -6,16 +6,9 @@ manifest_version: 2
 options_page: assets/html/mission-control.html
 
 
-
 browser_action:
   default_icon: assets/images/icon_19x19_grey.png
   default_title: Tab roulette
-
-background:
-  scripts:
-    - javascript/lib/underscore.js
-    - javascript/lib.js
-    - javascript/background.js
 
 permissions:
   - tabs
@@ -24,10 +17,15 @@ permissions:
   - <all_urls>
 
 icons:
-  16: assets/images/icon_16x16.png
-  48': assets/images/icon_48x48.png
+  16:   assets/images/icon_16x16.png
+  48':  assets/images/icon_48x48.png
   128': assets/images/icon_128x128.png
 
+background:
+  scripts:
+    - javascript/lib/underscore.js
+    - javascript/lib.js
+    - javascript/background.js
 
 content_scripts:
   - matches:

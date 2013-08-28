@@ -12,7 +12,7 @@ window.TabController = ($scope) ->
 
     # Kick everything of
     withCurrentTab (currentTab) ->
-        anyTabsInWindowMatching currentTab.windowId, httpTabPredicate, (allTabs) ->
+        anyTabsInWindowMatching currentTab.windowId, httpTabPredicate, (allTabs) -> # Todo: Have a look at the predicate..
             iterate allTabs, (tab, next) ->
                 withScreenshotOf tab, (imageUrl) ->
                     withSettings tab, (settings) ->
