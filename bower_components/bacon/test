@@ -1,7 +1,0 @@
-#!/bin/bash -e
-
-npm install --silent
-
-export grep=$1
-
-./node_modules/mocha/bin/mocha --compilers coffee:coffee-script spec/*Spec.coffee
