@@ -14,8 +14,8 @@ browser_action:
 background:
   scripts:
     - javascript/lib/underscore.js
-    - javascript/compiled/lib.js'
-    - javascript/compiled/background.js
+    - javascript/lib.js
+    - javascript/background.js
 
 permissions:
   - tabs
@@ -28,11 +28,12 @@ icons:
   48': assets/images/icon_48x48.png
   128': assets/images/icon_128x128.png
 
+
 content_scripts:
-  matches:
-    - <all_urls>
-  css:
-    - assets/css/content-script.css
-  js:
-    - javascript/lib/jquery.js
-    - javascript/dependencies/content-script.js
+  - matches:
+      - <all_urls>
+    css:
+      - assets/css/content-script.css
+    js:
+      - javascript/lib/jquery.js
+      - javascript/content-script.js

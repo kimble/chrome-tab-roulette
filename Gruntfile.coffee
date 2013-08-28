@@ -77,9 +77,9 @@ module.exports = (grunt) ->
             compile:
                 expand: true,
                 flatten: true,
-                cwd: 'src/main/coffee/',
+                cwd: 'src/main/coffee',
                 src: ['*.coffee'],
-                dest: 'dist/javascript/compiled',
+                dest: 'dist/javascript',
                 ext: '.js'
 
 
@@ -89,16 +89,18 @@ module.exports = (grunt) ->
                     'dist/manifest.json': 'assets/chrome/manifest.yml'
 
 
-
         watch:
+            assets:
+                files: ['assets/**']
+                tasks: ['build']
+
             coffee:
                 files: ['src/main/coffee/*.coffee'],
-                tasks: 'build'
+                tasks: ['build']
 
             karma:
                 files: ['dist/javascript/compiled/**/*.js', 'src/test/javascript/**/*.js'],
                 tasks: ['karma:unit:run']
-
 
 
 
