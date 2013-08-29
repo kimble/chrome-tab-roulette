@@ -85,3 +85,9 @@ transitionTo = (tab, callback) ->
                     setTimeout timeoutCallback, secondsOnPage * 1000
                     setTimeout beforeTimeoutCallback, (secondsOnPage-1) * 1000
 
+
+# On install
+
+chrome.runtime.onInstalled.addListener (type) ->
+    if type.reason == "install"
+        chrome.tabs.create url: "assets/html/after-install.html", active: true

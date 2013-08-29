@@ -28,7 +28,6 @@ background:
     - javascript/define.js
     - javascript/tab.js
     - javascript/settings.js
-    - javascript/common.js
     - javascript/background.js
 
 content_scripts:
