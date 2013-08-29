@@ -12,7 +12,7 @@ window.TabController = ($scope) ->
 
     # Kick everything of
     withCurrentTab (currentTab) ->
-        anyTabsInWindowMatching currentTab.windowId, cycleableTabPredicate, (matchedTabs) ->
+        anyTabsInWindowMatching currentTab.windowId, cycleableTab, (matchedTabs) ->
             iterate matchedTabs, (tab, next) ->
                 withScreenshotOf tab, (imageUrl) ->
                     withSettings tab, (settings) ->

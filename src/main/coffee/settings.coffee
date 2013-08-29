@@ -7,7 +7,7 @@ class TabSettings
         # Default values
         @state =
             reload : true
-            seconds : 10
+            seconds : 4
 
     stripQuery : (url) ->
         if url.indexOf('?') > -1

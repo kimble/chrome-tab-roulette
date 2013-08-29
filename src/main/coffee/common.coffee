@@ -7,14 +7,17 @@
 
 # Predicates
 
-urlMatching = (regex) ->
-    (tab) ->
-        regex.test(tab.url)
-
-window.cycleableTabPredicate = urlMatching(/^(http|file)/)
 
 
-# Tab functions
 
-window.selectTab = (tab, callback) ->
-    chrome.tabs.update tab.id, { active: true }, callback
+
+
+
+### Used
+###
+
+window.streamFromCallback = (handler) ->
+    bus = new Bacon.Bus
+    callback = (val) -> bus.push val
+    handler(callback)
+    return bus
