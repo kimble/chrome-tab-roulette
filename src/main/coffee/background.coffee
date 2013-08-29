@@ -44,7 +44,7 @@ activate = (startingTab) ->
         sendSimpleEventMessage(t, 'slideshow.started') for t in tabs
 
     withNextTab startingTab, (nextTab) ->
-        transitionTo nextTab, ->
+        transitionTo nextTab
 
 
 
@@ -59,31 +59,40 @@ withSettingsFor = (tab, callback) ->
     settings.load callback
 
 
-considerReloading = (tab, settings) ->
-    if settings.reload
-        func = -> chrome.tabs.reload tab.id
-        setTimeout func, 1000
+reload = (tab) ->
+    chrome.tabs.reload tab.id
 
-transitionTo = (tab, callback) ->
+
+# Pre-defined messages
+informContentScriptAboutFocus = (tab) ->
+    sendSimpleEventMessage tab, 'tab.focus.gained'
+
+informContentScriptAboutImminentFocusLoss = (tab) ->
+    sendSimpleEventMessage(tab, 'tab.focusloss.imminent')
+
+informContentScriptAboutScheduledFocus = (tab) ->
+    sendSimpleEventMessage(tab, 'tab.focus.scheduled')
+
+
+transitionTo = (tab) ->
     if active
         withSettingsFor tab, (tabSettings) ->
-            secondsOnPage = tabSettings.seconds
+            millisecondsDisplayTime = tabSettings.seconds * 1000
+            shouldBeReloaded = tabSettings.reload
 
-            selectTab tab, ->
-                sendSimpleEventMessage tab, 'tab.focus.gained'
-                callback(tab)
+            onPageActivation = ->
+                informContentScriptAboutFocus(tab)
 
-                withNextTab tab, (next) ->
-                    timeoutCallback = ->
-                        considerReloading tab, tabSettings
-                        transitionTo next, ->
+                withNextTab tab, (next) -> # Todo: Assert next tab
+                    informContentScriptAboutScheduledFocus(next)
 
-                    beforeTimeoutCallback = ->
-                        sendSimpleEventMessage(tab, 'tab.focusloss.imminent')
+                    setTimeout ( -> transitionTo next ), millisecondsDisplayTime
+                    setTimeout ( -> reload(tab) if shouldBeReloaded), millisecondsDisplayTime + 1000
+                    setTimeout ( -> informContentScriptAboutImminentFocusLoss(tab)), millisecondsDisplayTime - 1000
 
-                    sendSimpleEventMessage(next, 'tab.focus.scheduled')
-                    setTimeout timeoutCallback, secondsOnPage * 1000
-                    setTimeout beforeTimeoutCallback, (secondsOnPage-1) * 1000
+
+            selectTab tab, onPageActivation
+
 
 
 # On install
