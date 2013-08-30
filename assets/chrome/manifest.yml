@@ -23,7 +23,9 @@ icons:
 
 background:
   scripts:
+    - javascript/amd-shim.js
     - javascript/lib/underscore.js
+    - javascript/lib/when.js
     - javascript/lib/Bacon.js
     - javascript/define.js
     - javascript/tab.js

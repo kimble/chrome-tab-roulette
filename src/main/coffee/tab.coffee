@@ -40,5 +40,12 @@ window.considerReloading = (tab, filter) ->
 window.selectTab = (tab, callback) ->
     chrome.tabs.update tab.id, { active: true }, callback
 
+window.promiseActiveTab = (tab) ->
+    promiseMe (resolve) ->
+        selectTab(tab, resolve)
+
 window.reload = (tab) ->
-    chrome.tabs.reload tab.id
+    promiseMe (resolve) ->
+        chrome.tabs.reload tab.id, { }, ->
+            resolve(tab)
+

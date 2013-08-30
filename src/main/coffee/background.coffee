@@ -57,6 +57,12 @@ informContentScriptAboutScheduledFocus = (tab) ->
     sendSimpleEventMessage(tab, 'tab.focus.scheduled')
 
 
+
+# Flow
+
+
+
+
 transitionTo = (tab) ->
     if active
         withSettingsFor tab, (tabSettings) ->

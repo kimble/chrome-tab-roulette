@@ -1,7 +1,9 @@
-iterate = (entries, entryCallback) =>
+iterate = (entries, doneCallback, entryCallback) =>
     if entries.length > 0
         entryCallback entries[0], =>
-            iterate entries[1..], entryCallback
+            iterate entries[1..], doneCallback, entryCallback
+    else
+        doneCallback()
 
 
 window.TabController = ($scope) ->
@@ -9,23 +11,27 @@ window.TabController = ($scope) ->
     $scope.updateSettings = (tab) -> tab.settings.flush()
     $scope.gotoTab = (tab) -> selectTab tab
 
+    updateScope = (tab, settings, imageUrl) ->
+        $scope.$apply ->
+            tab.settings = settings
+            tab.imageUrl = imageUrl
+            $scope.tabs.push tab
 
     # Kick everything of
     withCurrentTab (currentTab) ->
         anyTabsInWindowMatching currentTab.windowId, cycleableTab, (matchedTabs) ->
-            iterate matchedTabs, (tab, next) ->
-                withScreenshotOf tab, (imageUrl) ->
-                    withSettings tab, (settings) ->
-                        $scope.$apply ->
-                            tab.settings = settings
-                            tab.imageUrl = imageUrl
-                            $scope.tabs.push tab
+            whenDoneIterating = -> selectTab(currentTab)
+            iterate matchedTabs, whenDoneIterating, (tab, progress) ->
 
-                        next()
+                selectTab tab, ->
+                    withSettingsFor tab, (settings) ->
+                        withScreenshot tab, (imageUri) ->
+                            updateScope(tab, settings, imageUri)
+                            progress()
 
 
     # Listens for closed tabs
-    chrome.tabs.onRemoved.addListener (tabId, removeInfo) =>
+    chrome.tabs.onRemoved.addListener (tabId) =>
         $scope.$apply =>
             $scope.tabs = _.filter $scope.tabs, (e) -> e.id != tabId
 
@@ -49,17 +55,17 @@ anyTabsInWindowMatching = (windowId, predicate, callback) ->
 withAllTabsInWindow = (windowId, callback) ->
     chrome.tabs.query { windowId: windowId }, callback
 
-withSettings = (tab, callback) ->
-    settings = new TabSettings tab.url
-    settings.load ->
-        callback settings
-
-withScreenshotOf = (subjectTab, screenshotListener) ->
-    withCurrentTab (originalTab) ->
-        selectTab subjectTab, ->
-            chrome.tabs.captureVisibleTab subjectTab.windowId, { }, (imageUrl) ->
-                selectTab originalTab, ->
-                    screenshotListener imageUrl
+withScreenshot = (subjectTab, callback) ->
+    chrome.tabs.captureVisibleTab subjectTab.windowId, { }, callback
 
 
+# Experimental
+
+promiseScreenshot = (subjectTab) ->
+    promiseMe (resolveImageUrl) ->
+        chrome.tabs.captureVisibleTab subjectTab.windowId, { }, resolveImageUrl
+
+promiseSettings = (tab) ->
+    promiseMe (res) ->
+        withSettings(tab, res)
 

@@ -29,7 +29,9 @@ module.exports = (grunt) ->
 
                 files: [
                     {
-                        src: [ 'dist/**' ],
+                        expand: true,
+                        cwd: 'dist/',
+                        src: ['**'],
                         dest: '/'
                     }
                 ]
@@ -114,6 +116,7 @@ module.exports = (grunt) ->
     grunt.loadNpmTasks 'grunt-notify'
     grunt.loadNpmTasks 'grunt-yaml'
     grunt.loadNpmTasks 'grunt-karma'
+
 
 
     grunt.registerTask 'tdd', [ 'karma:unit', 'watch' ]
