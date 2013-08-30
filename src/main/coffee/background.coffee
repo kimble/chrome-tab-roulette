@@ -1,31 +1,27 @@
 active = false
 
 
-chrome.browserAction.onClicked.addListener (tab) =>
-    if active
-        disable(tab)
-    else
-        activate(tab)
 
 # Badge functions
+
+chrome.browserAction.onClicked.addListener (tab) =>
+    if active then disable(tab) else activate(tab)
 
 updateBadge = (text, iconPath) ->
     chrome.browserAction.setBadgeText { text: text }
     chrome.browserAction.setIcon { path: iconPath }
 
 
-# Content script functions
+# Content script messaging functions
 
 sendMessageToTab = (recipientTab, payload) ->
-    chrome.tabs.sendMessage recipientTab.id, payload
+    chrome.tabs.sendMessage(recipientTab.id, payload)
 
 sendSimpleEventMessage = (recipientTab, eventName) ->
-    sendMessageToTab recipientTab, { event: eventName }
+    sendMessageToTab(recipientTab, { event: eventName })
 
-sendDelayedMessageToTab = (recipentTab, delayInMillis, payload) ->
-    delayedFunc = -> sendMessageToTab recipentTab, payload
-    setTimeout delayedFunc, delayInMillis
 
+# Lifecycle
 
 disable = (tab) ->
     active = false
@@ -48,19 +44,6 @@ activate = (startingTab) ->
 
 
 
-withFirstTab = (windowId, callback) ->
-    withAllTabsInWindow windowId, (tabs) ->
-        if tabs.length > 0
-            callback tabs[0]
-
-
-withSettingsFor = (tab, callback) ->
-    settings = new TabSettings tab.url
-    settings.load callback
-
-
-reload = (tab) ->
-    chrome.tabs.reload tab.id
 
 
 # Pre-defined messages
@@ -86,9 +69,9 @@ transitionTo = (tab) ->
                 withNextTab tab, (next) -> # Todo: Assert next tab
                     informContentScriptAboutScheduledFocus(next)
 
-                    setTimeout ( -> transitionTo next ), millisecondsDisplayTime
-                    setTimeout ( -> reload(tab) if shouldBeReloaded), millisecondsDisplayTime + 1000
-                    setTimeout ( -> informContentScriptAboutImminentFocusLoss(tab)), millisecondsDisplayTime - 1000
+                    setTimeout ( -> transitionTo(next) ), millisecondsDisplayTime
+                    setTimeout ( -> reload(tab) if shouldBeReloaded ), millisecondsDisplayTime + 1000
+                    setTimeout ( -> informContentScriptAboutImminentFocusLoss(tab) ), millisecondsDisplayTime - 1000
 
 
             selectTab tab, onPageActivation

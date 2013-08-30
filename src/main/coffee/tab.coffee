@@ -33,11 +33,12 @@ window.cyclableTabsInWindow = (windowId, callback) ->
     chrome.tabs.query windowId: windowId, (windowTabs) ->
         callback windowTabs.filter(cycleableTab)
 
-
 window.considerReloading = (tab, filter) ->
     withSettingsFor tab, (tabSettings) ->
         chrome.tabs.reload(tab.id) if filter(tab) && tabSettings.reload
 
-
 window.selectTab = (tab, callback) ->
     chrome.tabs.update tab.id, { active: true }, callback
+
+window.reload = (tab) ->
+    chrome.tabs.reload tab.id
