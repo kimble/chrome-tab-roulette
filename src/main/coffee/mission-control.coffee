@@ -43,6 +43,9 @@ window.TabController = ($scope) ->
 withCurrentTab = (callback) ->
     chrome.tabs.getCurrent (current) => callback current
 
+selectTab = (tab, callback) ->
+    chrome.tabs.update tab.id, { active: true }, callback
+
 forNewTabsInWindow = (windowId, callback) ->
     chrome.tabs.onCreated.addListener (newTab) =>
         if windowId == newTab.windowId
@@ -57,15 +60,4 @@ withAllTabsInWindow = (windowId, callback) ->
 
 withScreenshot = (subjectTab, callback) ->
     chrome.tabs.captureVisibleTab subjectTab.windowId, { }, callback
-
-
-# Experimental
-
-promiseScreenshot = (subjectTab) ->
-    promiseMe (resolveImageUrl) ->
-        chrome.tabs.captureVisibleTab subjectTab.windowId, { }, resolveImageUrl
-
-promiseSettings = (tab) ->
-    promiseMe (res) ->
-        withSettings(tab, res)
 

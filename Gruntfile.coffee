@@ -62,6 +62,12 @@ module.exports = (grunt) ->
                 src: ['**/*.js'],
                 dest: 'dist/javascript/lib/'
 
+            manualDependencies:
+                expand: true,
+                cwd: 'dependencies/manual'
+                src: [ '**/*.js' ]
+                dest: 'dist/javascript/lib'
+
 
         karma:
             unit:

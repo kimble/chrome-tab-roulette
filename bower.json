@@ -2,10 +2,9 @@
     "name": "chrome-tab-roulette",
     "dependencies": {
         "angular": "~1.0.7",
-        "bacon": "~0.6.13",
+        "bacon": "~0.6.14",
         "jquery": "~2.0.3",
-        "underscore": "~1.5.1",
-        "when": "~2.3.0"
+        "underscore": "~1.5.1"
     },
     "exportsOverride": {
         "angular": {
@@ -19,9 +18,6 @@
         },
         "underscore": {
             "js": "**/underscore.js"
-        },
-        "when": {
-            "js" : "**/when.js"
         }
     }
 }

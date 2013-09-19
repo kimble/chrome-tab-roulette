@@ -6,7 +6,8 @@ class TabSettings
 
         # Default values
         @state =
-            reload : true
+            key : @key
+            reload : false
             seconds : 4
 
     stripQuery : (url) ->
@@ -32,13 +33,19 @@ class TabSettings
         update = { }
         update[@key] = JSON.stringify @state
 
-        storage.set update, =>
-            console.dir update
+        storage.set update
 
 
 window.TabSettings = TabSettings
 
 
 window.withSettingsFor = (tab, callback) ->
-    settings = new TabSettings tab.url
-    settings.load callback
+    settings = new TabSettings tab?.url
+    settings.load ->
+        callback(settings)
+
+window.settingsLookup = (tab) ->
+    (asyncCallback) ->
+        settings = new TabSettings tab?.url
+        settings.load (settings) ->
+            asyncCallback null, settings

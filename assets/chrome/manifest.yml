@@ -23,9 +23,8 @@ icons:
 
 background:
   scripts:
-    - javascript/amd-shim.js
     - javascript/lib/underscore.js
-    - javascript/lib/when.js
+    - javascript/lib/async.js
     - javascript/lib/Bacon.js
     - javascript/define.js
     - javascript/tab.js
@@ -35,8 +34,12 @@ background:
 content_scripts:
   - matches:
       - <all_urls>
+    run_at: document_end
     css:
       - assets/css/content-script.css
     js:
       - javascript/lib/jquery.js
+      - javascript/lib/async.js
+      - javascript/lib/Bacon.js
       - javascript/content-script.js
+
