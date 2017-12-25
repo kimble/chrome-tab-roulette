@@ -69,17 +69,6 @@ module.exports = (grunt) ->
                 dest: 'dist/javascript/lib'
 
 
-        karma:
-            unit:
-                configFile: 'config/karma.conf.js',
-                browsers: ['PhantomJS'],
-                background: true
-
-            single:
-                configFile: 'config/karma.conf.js',
-                browsers: ['PhantomJS'],
-                singleRun: true
-
 
         coffee:
             compile:
@@ -121,12 +110,10 @@ module.exports = (grunt) ->
     grunt.loadNpmTasks 'grunt-bower-task'
     grunt.loadNpmTasks 'grunt-notify'
     grunt.loadNpmTasks 'grunt-yaml'
-    grunt.loadNpmTasks 'grunt-karma'
 
 
-
-    grunt.registerTask 'tdd', [ 'karma:unit', 'watch' ]
-    grunt.registerTask 'build', [ 'clean:dist', 'yaml', 'coffee', 'copy', 'karma:single' ]
+    grunt.registerTask 'tdd', [ 'watch' ]
+    grunt.registerTask 'build', [ 'clean:dist', 'yaml', 'coffee', 'copy' ]
     grunt.registerTask 'build-release', [ 'build', 'compress:release' ]
 
     # Default task.
