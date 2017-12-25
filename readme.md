@@ -8,4 +8,4 @@ Build script
 ------------
 You'll have to have Grunt installed...
 
-The project is built using `grunt build`
+The project is built using `npm run build`

@@ -12,29 +12,22 @@ module.exports = (grunt) ->
 
         # Task configuration.
 
-        bower:
-          install:
-            options:
-              layout: 'byComponent'
-              targetDir: 'dependencies/bower'
-              cleanTargetDir: true
-
         clean:
-            dist: [ 'dist/' ]
+            dist: ['dist/']
+
 
         compress:
             release:
                 options:
                     archive: 'builds/chrome-tab-roulette-v<%= pkg.version %>.zip'
 
-                files: [
-                    {
+                files: [{
                         expand: true,
                         cwd: 'dist/',
                         src: ['**'],
                         dest: '/'
-                    }
-                ]
+                    }]
+
 
         copy:
             images:
@@ -55,19 +48,11 @@ module.exports = (grunt) ->
                 src: ['*.html'],
                 dest: 'dist/assets/html'
 
-            bowerDependencies:
-                expand: true,
-                flatten: true
-                cwd: 'dependencies/bower',
-                src: ['**/*.js'],
-                dest: 'dist/javascript/lib/'
-
             manualDependencies:
                 expand: true,
                 cwd: 'dependencies/manual'
-                src: [ '**/*.js' ]
+                src: ['**/*.js']
                 dest: 'dist/javascript/lib'
-
 
 
         coffee:
@@ -95,10 +80,6 @@ module.exports = (grunt) ->
                 files: ['src/main/coffee/*.coffee'],
                 tasks: ['build']
 
-            karma:
-                files: ['dist/javascript/compiled/**/*.js', 'src/test/javascript/**/*.js'],
-                tasks: ['karma:unit:run']
-
 
 
     # These plugins provide necessary tasks.
@@ -107,15 +88,13 @@ module.exports = (grunt) ->
     grunt.loadNpmTasks 'grunt-contrib-copy'
     grunt.loadNpmTasks 'grunt-contrib-coffee'
     grunt.loadNpmTasks 'grunt-contrib-watch'
-    grunt.loadNpmTasks 'grunt-bower-task'
     grunt.loadNpmTasks 'grunt-notify'
     grunt.loadNpmTasks 'grunt-yaml'
 
-
-    grunt.registerTask 'tdd', [ 'watch' ]
-    grunt.registerTask 'build', [ 'clean:dist', 'yaml', 'coffee', 'copy' ]
-    grunt.registerTask 'build-release', [ 'build', 'compress:release' ]
+    grunt.registerTask 'tdd', ['watch']
+    grunt.registerTask 'build', ['clean:dist', 'yaml', 'coffee', 'copy']
+    grunt.registerTask 'build-release', ['build', 'compress:release']
 
     # Default task.
-    grunt.registerTask 'default', [ 'build' ]
+    grunt.registerTask 'default', ['build']
 
